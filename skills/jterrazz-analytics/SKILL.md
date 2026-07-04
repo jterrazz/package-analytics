@@ -13,8 +13,18 @@ Part of the @jterrazz ecosystem. Defines how all projects track product events.
 import type { AnalyticsPort } from '@jterrazz/analytics';
 
 interface AnalyticsPort {
-    track(event: string, options?: { profileId?: string; properties?: Record<string, unknown> }): Promise<void>;
-    identify(profile: { profileId: string; email?: string; firstName?: string; lastName?: string; avatar?: string; properties?: Record<string, unknown> }): Promise<void>;
+    track(
+        event: string,
+        options?: { profileId?: string; properties?: Record<string, unknown> },
+    ): Promise<void>;
+    identify(profile: {
+        profileId: string;
+        email?: string;
+        firstName?: string;
+        lastName?: string;
+        avatar?: string;
+        properties?: Record<string, unknown>;
+    }): Promise<void>;
     increment(property: string, options: { profileId: string; value?: number }): Promise<void>;
     decrement(property: string, options: { profileId: string; value?: number }): Promise<void>;
     setGlobalProperties(properties: Record<string, unknown>): void;

@@ -52,13 +52,13 @@ const analytics = new NoopAnalyticsAdapter();
 
 ## API
 
-| Method | Description |
-|--------|-------------|
-| `track(event, { profileId?, properties? })` | Track a named event, optionally scoped to a user |
-| `identify({ profileId, email?, firstName?, lastName?, avatar?, properties? })` | Attach identity and traits to a profile |
-| `increment(property, { profileId, value? })` | Increment a numeric profile property |
-| `decrement(property, { profileId, value? })` | Decrement a numeric profile property |
-| `setGlobalProperties(properties)` | Set properties sent with every subsequent event |
+| Method                                                                         | Description                                      |
+| ------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `track(event, { profileId?, properties? })`                                    | Track a named event, optionally scoped to a user |
+| `identify({ profileId, email?, firstName?, lastName?, avatar?, properties? })` | Attach identity and traits to a profile          |
+| `increment(property, { profileId, value? })`                                   | Increment a numeric profile property             |
+| `decrement(property, { profileId, value? })`                                   | Decrement a numeric profile property             |
+| `setGlobalProperties(properties)`                                              | Set properties sent with every subsequent event  |
 
 ## Port Interface
 
