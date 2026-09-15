@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, type Mock, test, vi } from 'vitest';
 
 import {
     type AnalyticsEvents,
@@ -12,31 +12,73 @@ const API_URL = 'https://analytics.example.com/api';
 /**
  * Compile-time tracking plan — mirrors how apps declare their event catalogue.
  */
-interface TestEvents extends AnalyticsEvents {
+type TestEvents = AnalyticsEvents & {
     app_link_opened: { platform: 'android' | 'desktop' | 'ios'; slug: string };
     user_signed_up: { plan: string };
+};
+
+/** One captured ingest call, read the way an HTTP server would read it. */
+type CapturedRequest = {
+    body: Record<string, unknown>;
+    headers: Record<string, string>;
+    url: string;
+};
+
+type FetchCall = Parameters<typeof globalThis.fetch>;
+
+function readUrl(input: RequestInfo | URL): string {
+    if (typeof input === 'string') {
+        return input;
+    }
+
+    return input instanceof URL ? input.href : input.url;
+}
+
+function readBody(init: RequestInit | undefined): Record<string, unknown> {
+    if (typeof init?.body !== 'string') {
+        return {};
+    }
+
+    const parsed: unknown = JSON.parse(init.body);
+
+    return typeof parsed === 'object' && parsed !== null
+        ? Object.fromEntries(Object.entries(parsed))
+        : {};
+}
+
+function capture([input, init]: FetchCall): CapturedRequest {
+    return {
+        body: readBody(init),
+        headers: Object.fromEntries(new Headers(init?.headers).entries()),
+        url: readUrl(input),
+    };
 }
 
 describe('analytics flow integration', () => {
-    let fetchMock: ReturnType<typeof vi.fn>;
+    let fetchMock: Mock<typeof globalThis.fetch>;
     let originalFetch: typeof globalThis.fetch;
 
     beforeEach(() => {
         originalFetch = globalThis.fetch;
-        fetchMock = vi.fn().mockImplementation(() => Promise.resolve(Response.json({})));
-        globalThis.fetch = fetchMock as unknown as typeof globalThis.fetch;
+        fetchMock = vi.fn<typeof globalThis.fetch>().mockResolvedValue(Response.json({}));
+        globalThis.fetch = fetchMock;
     });
 
     afterEach(() => {
         globalThis.fetch = originalFetch;
     });
 
-    const requests = () =>
-        fetchMock.mock.calls.map(([url, init]) => ({
-            body: JSON.parse(String((init as RequestInit).body)) as Record<string, unknown>,
-            headers: (init as RequestInit).headers as Record<string, string>,
-            url: String(url),
-        }));
+    const requests = (): CapturedRequest[] => fetchMock.mock.calls.map(capture);
+
+    const firstRequest = (): CapturedRequest => {
+        const [call] = fetchMock.mock.calls;
+
+        if (call === undefined) {
+            throw new Error('No request reached the fetch mock');
+        }
+
+        return capture(call);
+    };
 
     const createAdapter = () =>
         new OpenPanelAnalyticsAdapter<TestEvents>({
@@ -46,7 +88,7 @@ describe('analytics flow integration', () => {
             globalProperties: { app: 'integration-test' },
         });
 
-    it('should send authenticated track events to the self-hosted /track endpoint', async () => {
+    test('should send authenticated track events to the self-hosted /track endpoint', async () => {
         // Given — an adapter pointed at a self-hosted ingest endpoint
         const analytics = createAdapter();
 
@@ -57,7 +99,7 @@ describe('analytics flow integration', () => {
         });
 
         // Then — one request hits the instance's /track endpoint
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.url).toBe(`${API_URL}/track`);
 
         // Then — the request authenticates with the configured client credentials
@@ -77,7 +119,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should forward the end user ip and user-agent through a child scope', async () => {
+    test('should forward the end user ip and user-agent through a child scope', async () => {
         // Given — a request-scoped child, as built by a server composition root
         const analytics = createAdapter();
         const requestAnalytics = analytics.child({
@@ -92,7 +134,7 @@ describe('analytics flow integration', () => {
 
         // Then — the ingest request carries the headers OpenPanel uses to
         // Derive geolocation (ip) and device/browser/os (user-agent)
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.headers).toMatchObject({
             'openpanel-client-ip': '203.0.113.7',
             'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
@@ -104,7 +146,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should keep the parent scope free of child context', async () => {
+    test('should keep the parent scope free of child context', async () => {
         // Given — a parent adapter with a derived child scope
         const analytics = createAdapter();
         analytics.child({ ip: '203.0.113.7', userAgent: 'Mozilla/5.0' });
@@ -113,12 +155,12 @@ describe('analytics flow integration', () => {
         await analytics.track('user_signed_up', { properties: { plan: 'free' } });
 
         // Then — the parent request carries no request-context headers
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.headers['openpanel-client-ip']).toBeUndefined();
         expect(request.headers['user-agent']).toBeUndefined();
     });
 
-    it('should attach the child profileId and deviceId to events', async () => {
+    test('should attach the child profileId and deviceId to events', async () => {
         // Given — a child scope bound to an identified user and web device
         const analytics = createAdapter();
         const requestAnalytics = analytics.child({
@@ -131,7 +173,7 @@ describe('analytics flow integration', () => {
         await requestAnalytics.track('user_signed_up', { properties: { plan: 'pro' } });
 
         // Then — the event inherits the scope's profile and device identity
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.body).toMatchObject({
             payload: {
                 name: 'user_signed_up',
@@ -146,7 +188,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should send page views as screen_view with reserved properties', async () => {
+    test('should send page views as screen_view with reserved properties', async () => {
         // Given — an adapter
         const analytics = createAdapter();
 
@@ -159,7 +201,7 @@ describe('analytics flow integration', () => {
 
         // Then — OpenPanel receives its reserved screen_view shape, from
         // Which it derives path, query and UTM attribution server-side
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.body).toMatchObject({
             payload: {
                 name: 'screen_view',
@@ -173,7 +215,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should send revenue events with the default EUR currency', async () => {
+    test('should send revenue events with the default EUR currency', async () => {
         // Given — an adapter
         const analytics = createAdapter();
 
@@ -181,7 +223,7 @@ describe('analytics flow integration', () => {
         await analytics.revenue(49.9, { profileId: 'user-1' });
 
         // Then — the reserved revenue event carries amount and currency
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.body).toMatchObject({
             payload: {
                 name: 'revenue',
@@ -192,7 +234,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should send identify payloads with codified traits in properties', async () => {
+    test('should send identify payloads with codified traits in properties', async () => {
         // Given — an adapter and a profile with Segment-style traits
         const analytics = createAdapter();
 
@@ -207,7 +249,7 @@ describe('analytics flow integration', () => {
         });
 
         // Then — native fields are top-level, codified traits are properties
-        const [request] = requests();
+        const request = firstRequest();
         expect(request.body).toMatchObject({
             payload: {
                 email: 'user@example.com',
@@ -223,7 +265,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should send profile counters through the full flow', async () => {
+    test('should send profile counters through the full flow', async () => {
         // Given — an adapter
         const analytics = createAdapter();
 
@@ -243,7 +285,7 @@ describe('analytics flow integration', () => {
         });
     });
 
-    it('should send nothing when using the noop adapter', async () => {
+    test('should send nothing when using the noop adapter', async () => {
         // Given — a noop adapter satisfying the same typed port
         const analytics: AnalyticsPort<TestEvents> = new NoopAnalyticsAdapter<TestEvents>();
 

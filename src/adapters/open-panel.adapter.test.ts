@@ -1,22 +1,22 @@
 import { OpenPanel } from '@openpanel/sdk';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { OpenPanelAnalyticsAdapter } from './open-panel.adapter.js';
 
-const trackSpy = vi.spyOn(OpenPanel.prototype, 'track').mockResolvedValue(undefined);
-const identifySpy = vi.spyOn(OpenPanel.prototype, 'identify').mockReturnValue(undefined);
-const incrementSpy = vi.spyOn(OpenPanel.prototype, 'increment').mockResolvedValue(undefined);
-const decrementSpy = vi.spyOn(OpenPanel.prototype, 'decrement').mockResolvedValue(undefined);
+const trackSpy = vi.spyOn(OpenPanel.prototype, 'track').mockResolvedValue();
+const identifySpy = vi.spyOn(OpenPanel.prototype, 'identify').mockResolvedValue();
+const incrementSpy = vi.spyOn(OpenPanel.prototype, 'increment').mockResolvedValue();
+const decrementSpy = vi.spyOn(OpenPanel.prototype, 'decrement').mockResolvedValue();
 const setGlobalPropertiesSpy = vi
     .spyOn(OpenPanel.prototype, 'setGlobalProperties')
-    .mockImplementation(() => undefined);
+    .mockReturnValue();
 
-describe('OpenPanelAnalyticsAdapter', () => {
+describe('openPanelAnalyticsAdapter', () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-    it('should apply global properties from the config', () => {
+    test('should apply global properties from the config', () => {
         // Given / When — an adapter created with global properties
         const analytics = new OpenPanelAnalyticsAdapter({
             clientId: 'client-id',
@@ -28,7 +28,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         expect(setGlobalPropertiesSpy).toHaveBeenCalledWith({ app: 'jterrazz-web' });
     });
 
-    it('should track an event with profile and properties', async () => {
+    test('should track an event with profile and properties', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -45,7 +45,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should track a page view as a screen_view event', async () => {
+    test('should track a page view as a screen_view event', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -68,7 +68,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should omit undefined page fields', async () => {
+    test('should omit undefined page fields', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -82,7 +82,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should track revenue in EUR by default', async () => {
+    test('should track revenue in EUR by default', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -97,7 +97,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should track revenue with an explicit currency and properties', async () => {
+    test('should track revenue with an explicit currency and properties', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -116,7 +116,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should identify a profile and flatten codified traits into properties', async () => {
+    test('should identify a profile and flatten codified traits into properties', async () => {
         // Given — an adapter and a profile using codified Segment-style traits
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -147,7 +147,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should increment and decrement profile counters', async () => {
+    test('should increment and decrement profile counters', async () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -168,7 +168,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         });
     });
 
-    it('should create an independent child scope', () => {
+    test('should create an independent child scope', () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
@@ -180,7 +180,7 @@ describe('OpenPanelAnalyticsAdapter', () => {
         expect(child).not.toBe(analytics);
     });
 
-    it('should forward global properties set after construction', () => {
+    test('should forward global properties set after construction', () => {
         // Given — an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
