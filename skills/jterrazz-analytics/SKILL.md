@@ -9,25 +9,35 @@ Part of the @jterrazz ecosystem. Defines how all projects track product events.
 
 ## Port
 
+`AnalyticsPort<TEvents>` is the one type an application depends on — eight members, every one of them a property signature:
+
 ```typescript
 import type { AnalyticsPort } from '@jterrazz/analytics';
 
-interface AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> {
-    child(context: {
-        ip?: string;
-        userAgent?: string;
-        profileId?: string;
-        deviceId?: string;
-        locale?: string;
-    }): AnalyticsPort<TEvents>;
-    track(event: keyof TEvents, options?: { profileId?: string; properties? }): Promise<void>;
-    page(page: { url: string; title?: string; referrer?: string }, options?): Promise<void>;
-    revenue(amount: number, options?: { currency?; profileId?; properties? }): Promise<void>;
-    identify(profile: AnalyticsProfile): Promise<void>;
-    increment(property: string, options: { profileId: string; value?: number }): Promise<void>;
-    decrement(property: string, options: { profileId: string; value?: number }): Promise<void>;
-    setGlobalProperties(properties: Record<string, unknown>): void;
-}
+type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
+    child: (context: AnalyticsContext) => AnalyticsPort<TEvents>;
+    decrement: (property: string, options: AnalyticsCounterOptions) => Promise<void>;
+    identify: (profile: AnalyticsProfile) => Promise<void>;
+    increment: (property: string, options: AnalyticsCounterOptions) => Promise<void>;
+    page: (page: AnalyticsPage, options?: AnalyticsPageOptions) => Promise<void>;
+    revenue: (amount: number, options?: AnalyticsRevenueOptions) => Promise<void>;
+    setGlobalProperties: (properties: Record<string, unknown>) => void;
+    track: (event: keyof TEvents & string, options?: AnalyticsTrackOptions) => Promise<void>;
+};
+```
+
+The request scope `child` takes, and the counter options `increment`/`decrement` take:
+
+```typescript
+type AnalyticsContext = {
+    deviceId?: string;
+    ip?: string;
+    locale?: string;
+    profileId?: string;
+    userAgent?: string;
+};
+
+type AnalyticsCounterOptions = { profileId: string; value?: number };
 ```
 
 ## Typed event catalogue (tracking plan)
@@ -35,9 +45,9 @@ interface AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> {
 Each app declares its events as a type — unknown events fail at compile time:
 
 ```typescript
-interface AppEvents extends AnalyticsEvents {
+type AppEvents = AnalyticsEvents & {
     app_link_opened: { platform: 'android' | 'desktop' | 'ios'; slug: string };
-}
+};
 const analytics: AnalyticsPort<AppEvents> = new OpenPanelAnalyticsAdapter<AppEvents>({ ... });
 ```
 

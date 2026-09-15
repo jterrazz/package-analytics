@@ -6,12 +6,20 @@ How a change to this package is made: the toolchain, the commands, and where a n
 
 `@jterrazz/typescript` is the one devDependency that builds, checks and lints this package — `npm install`, then:
 
-| Command            | Runs                                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `npm run build`    | `typescript bundle` — ESM + CJS + types into `dist/`                                                                |
-| `npm run lint`     | `typescript check` — typecheck, lint, format-check, knip, and (with this chapter's own bump) the Docs (layout) pass |
-| `npm run lint:fix` | `typescript fix` — auto-fixes lint and formatting                                                                   |
-| `npm test`         | `vitest --run`                                                                                                      |
+| Command            | Runs                                                                    |
+| ------------------ | ----------------------------------------------------------------------- |
+| `npm run build`    | `typescript bundle` — ESM + CJS + types into `dist/`                    |
+| `npm run lint`     | `typescript check` — every quality gate the toolchain ships, in one run |
+| `npm run lint:fix` | `typescript fix` — auto-fixes lint and formatting                       |
+| `npm test`         | `vitest --run`                                                          |
+
+The profile is `library`, named once in each of `tsconfig.json`, `oxlint.config.ts` and `oxfmt.config.ts` and nowhere else. It is the profile of a package published to a registry, so its tsconfig preset carries `isolatedDeclarations` and `erasableSyntaxOnly`: every export names its type explicitly, and no `enum`, `namespace` or parameter property may enter this tree.
+
+### The lint baseline
+
+`oxlint.baseline.json` records the diagnostics this package has not paid off, and the oxlint pass is judged against it rather than against oxlint's exit code. Today it holds one entry: seven `eslint/class-methods-use-this` on `NoopAnalyticsAdapter`, whose methods touch no `this` and cannot become static either, because the port asks every adapter for instance methods.
+
+The file only ever shrinks. A rule going up fails the run, a rule nobody recorded fails the run, and an entry that has reached zero fails until it is deleted — so `typescript baseline` is rerun when a count legitimately falls, never to make a fresh red go away.
 
 The `Makefile` wraps the same three verbs (`make build`, `make lint`, `make test`) behind one `npm ci`, keyed on `package-lock.json` via a `node_modules/.install` stamp — there is no combined `make check` target, so proving a change locally is `make lint && make test` (or the `npm run lint && npm test` it wraps).
 
