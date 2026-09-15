@@ -1,16 +1,16 @@
 import { OpenPanel } from '@openpanel/sdk';
 
 // Ports
-import type {
-    AnalyticsContext,
-    AnalyticsCounterOptions,
-    AnalyticsEvents,
-    AnalyticsPage,
-    AnalyticsPageOptions,
-    AnalyticsPort,
-    AnalyticsProfile,
-    AnalyticsRevenueOptions,
-    AnalyticsTrackOptions,
+import {
+    type AnalyticsContext,
+    type AnalyticsCounterOptions,
+    type AnalyticsEvents,
+    type AnalyticsPage,
+    type AnalyticsPageOptions,
+    type AnalyticsPort,
+    type AnalyticsProfile,
+    type AnalyticsRevenueOptions,
+    type AnalyticsTrackOptions,
 } from '../ports/analytics.js';
 
 const DEFAULT_CURRENCY = 'EUR';
@@ -19,14 +19,19 @@ function withoutUndefined(values: Record<string, unknown>): Record<string, unkno
     return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined));
 }
 
-export interface OpenPanelAnalyticsConfig {
+/** An absent context field and an empty one are the same thing: nothing to forward. */
+function isStated(value: string | undefined): value is string {
+    return value !== undefined && value !== '';
+}
+
+export type OpenPanelAnalyticsConfig = {
     /** Event ingest endpoint of a self-hosted instance; omit for OpenPanel cloud */
     apiUrl?: string;
     clientId: string;
     /** Required for server-side tracking and revenue events */
     clientSecret?: string;
     globalProperties?: Record<string, unknown>;
-}
+};
 
 /**
  * OpenPanel analytics adapter backed by @openpanel/sdk.
@@ -44,9 +49,9 @@ export class OpenPanelAnalyticsAdapter<
     constructor(config: OpenPanelAnalyticsConfig) {
         this.config = config;
         this.client = new OpenPanel({
-            apiUrl: config.apiUrl,
+            ...(config.apiUrl !== undefined && { apiUrl: config.apiUrl }),
+            ...(config.clientSecret !== undefined && { clientSecret: config.clientSecret }),
             clientId: config.clientId,
-            clientSecret: config.clientSecret,
         });
 
         if (config.globalProperties) {
@@ -61,21 +66,21 @@ export class OpenPanelAnalyticsAdapter<
             child.client.setGlobalProperties(this.client.global);
         }
 
-        if (context.ip) {
+        if (isStated(context.ip)) {
             child.client.api.addHeader('openpanel-client-ip', context.ip);
         }
 
-        if (context.userAgent) {
+        if (isStated(context.userAgent)) {
             child.client.api.addHeader('user-agent', context.userAgent);
         }
 
-        if (context.profileId) {
+        if (isStated(context.profileId)) {
             child.client.profileId = context.profileId;
         }
 
         const contextProperties: Record<string, unknown> = {
-            ...(context.deviceId && { __deviceId: context.deviceId }),
-            ...(context.locale && { locale: context.locale }),
+            ...(isStated(context.deviceId) && { __deviceId: context.deviceId }),
+            ...(isStated(context.locale) && { locale: context.locale }),
         };
 
         if (Object.keys(contextProperties).length > 0) {
@@ -87,9 +92,9 @@ export class OpenPanelAnalyticsAdapter<
 
     async decrement(property: string, options: AnalyticsCounterOptions): Promise<void> {
         await this.client.decrement({
+            ...(options.value !== undefined && { value: options.value }),
             profileId: options.profileId,
             property,
-            value: options.value,
         });
     }
 
@@ -97,10 +102,10 @@ export class OpenPanelAnalyticsAdapter<
         const { avatar, email, firstName, lastName, profileId, properties, ...traits } = profile;
 
         await this.client.identify({
-            avatar,
-            email,
-            firstName,
-            lastName,
+            ...(avatar !== undefined && { avatar }),
+            ...(email !== undefined && { email }),
+            ...(firstName !== undefined && { firstName }),
+            ...(lastName !== undefined && { lastName }),
             profileId,
             properties: {
                 ...properties,
@@ -114,9 +119,9 @@ export class OpenPanelAnalyticsAdapter<
 
     async increment(property: string, options: AnalyticsCounterOptions): Promise<void> {
         await this.client.increment({
+            ...(options.value !== undefined && { value: options.value }),
             profileId: options.profileId,
             property,
-            value: options.value,
         });
     }
 
@@ -127,7 +132,7 @@ export class OpenPanelAnalyticsAdapter<
                 __referrer: page.referrer,
                 __title: page.title,
             }),
-            profileId: options?.profileId,
+            ...(options?.profileId !== undefined && { profileId: options.profileId }),
         });
     }
 
@@ -135,8 +140,8 @@ export class OpenPanelAnalyticsAdapter<
         await this.client.track('revenue', {
             currency: options?.currency ?? DEFAULT_CURRENCY,
             ...options?.properties,
+            ...(options?.profileId !== undefined && { profileId: options.profileId }),
             __revenue: amount,
-            profileId: options?.profileId,
         });
     }
 
@@ -150,7 +155,7 @@ export class OpenPanelAnalyticsAdapter<
     ): Promise<void> {
         await this.client.track(event, {
             ...options?.properties,
-            profileId: options?.profileId,
+            ...(options?.profileId !== undefined && { profileId: options.profileId }),
         });
     }
 }
