@@ -12,7 +12,7 @@
  * Request-scoped context. Backends derive geolocation from `ip` and
  * device/browser/OS from `userAgent`.
  */
-export interface AnalyticsContext {
+export type AnalyticsContext = {
     /** Anonymous device identity shared with the web client */
     deviceId?: string;
     /** IP address of the end user */
@@ -23,12 +23,12 @@ export interface AnalyticsContext {
     profileId?: string;
     /** User-agent of the end user */
     userAgent?: string;
-}
+};
 
-export interface AnalyticsCounterOptions {
+export type AnalyticsCounterOptions = {
     profileId: string;
     value?: number;
-}
+};
 
 /**
  * Event catalogue: event name → typed properties. Apps extend this to get
@@ -40,14 +40,14 @@ export type AnalyticsEvents = Record<string, Record<string, unknown>>;
  * A viewed page. Backends extract path, origin, query and UTM attribution
  * from the full `url`.
  */
-export interface AnalyticsPage {
+export type AnalyticsPage = {
     referrer?: string;
     title?: string;
     /** Full URL, including query string */
     url: string;
-}
+};
 
-export interface AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> {
+export type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
     /**
      * Create an analytics scope bound to a request context — events sent
      * through the child inherit the context
@@ -91,17 +91,17 @@ export interface AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents
         event: TEvent,
         options?: AnalyticsTrackOptions<TEvents[TEvent]>,
     ) => Promise<void>;
-}
+};
 
-export interface AnalyticsPageOptions {
+export type AnalyticsPageOptions = {
     profileId?: string;
-}
+};
 
 /**
  * User profile. The codified traits follow the Segment identify spec;
  * anything else goes into `properties`.
  */
-export interface AnalyticsProfile {
+export type AnalyticsProfile = {
     avatar?: string;
     /** Account creation date — enables cohort analysis */
     createdAt?: Date;
@@ -117,18 +117,18 @@ export interface AnalyticsProfile {
     properties?: Record<string, unknown>;
     username?: string;
     website?: string;
-}
+};
 
-export interface AnalyticsRevenueOptions {
+export type AnalyticsRevenueOptions = {
     /** ISO 4217 currency code */
     currency?: string;
     profileId?: string;
     properties?: Record<string, unknown>;
-}
+};
 
-export interface AnalyticsTrackOptions<
+export type AnalyticsTrackOptions<
     TProperties extends Record<string, unknown> = Record<string, unknown>,
-> {
+> = {
     profileId?: string;
     properties?: TProperties;
-}
+};
