@@ -1,14 +1,14 @@
 // Ports
-import type {
-    AnalyticsContext,
-    AnalyticsCounterOptions,
-    AnalyticsEvents,
-    AnalyticsPage,
-    AnalyticsPageOptions,
-    AnalyticsPort,
-    AnalyticsProfile,
-    AnalyticsRevenueOptions,
-    AnalyticsTrackOptions,
+import {
+    type AnalyticsContext,
+    type AnalyticsCounterOptions,
+    type AnalyticsEvents,
+    type AnalyticsPage,
+    type AnalyticsPageOptions,
+    type AnalyticsPort,
+    type AnalyticsProfile,
+    type AnalyticsRevenueOptions,
+    type AnalyticsTrackOptions,
 } from '../ports/analytics.js';
 
 /**
@@ -22,34 +22,34 @@ export class NoopAnalyticsAdapter<
         return this;
     }
 
-    decrement(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
-        return Promise.resolve();
+    async decrement(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
+        // No operation
     }
 
-    identify(_profile: AnalyticsProfile): Promise<void> {
-        return Promise.resolve();
+    async identify(_profile: AnalyticsProfile): Promise<void> {
+        // No operation
     }
 
-    increment(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
-        return Promise.resolve();
+    async increment(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
+        // No operation
     }
 
-    page(_page: AnalyticsPage, _options?: AnalyticsPageOptions): Promise<void> {
-        return Promise.resolve();
+    async page(_page: AnalyticsPage, _options?: AnalyticsPageOptions): Promise<void> {
+        // No operation
     }
 
-    revenue(_amount: number, _options?: AnalyticsRevenueOptions): Promise<void> {
-        return Promise.resolve();
+    async revenue(_amount: number, _options?: AnalyticsRevenueOptions): Promise<void> {
+        // No operation
     }
 
     setGlobalProperties(_properties: Record<string, unknown>): void {
         // No operation
     }
 
-    track<TEvent extends keyof TEvents & string>(
+    async track<TEvent extends keyof TEvents & string>(
         _event: TEvent,
         _options?: AnalyticsTrackOptions<TEvents[TEvent]>,
     ): Promise<void> {
-        return Promise.resolve();
+        // No operation
     }
 }
