@@ -1,16 +1,16 @@
 import { OpenPanel } from '@openpanel/sdk';
 
 // Ports
-import {
-    type AnalyticsContext,
-    type AnalyticsCounterOptions,
-    type AnalyticsEvents,
-    type AnalyticsPage,
-    type AnalyticsPageOptions,
-    type AnalyticsPort,
-    type AnalyticsProfile,
-    type AnalyticsRevenueOptions,
-    type AnalyticsTrackOptions,
+import type {
+    AnalyticsContext,
+    AnalyticsCounterOptions,
+    AnalyticsEvents,
+    AnalyticsPage,
+    AnalyticsPageOptions,
+    AnalyticsPort,
+    AnalyticsProfile,
+    AnalyticsRevenueOptions,
+    AnalyticsTrackOptions,
 } from '../ports/analytics.js';
 
 const DEFAULT_CURRENCY = 'EUR';

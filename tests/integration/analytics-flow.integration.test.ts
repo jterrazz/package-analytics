@@ -1,11 +1,8 @@
-import { afterEach, beforeEach, describe, expect, type Mock, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { Mock } from 'vitest';
 
-import {
-    type AnalyticsEvents,
-    type AnalyticsPort,
-    NoopAnalyticsAdapter,
-    OpenPanelAnalyticsAdapter,
-} from '../../src/index.js';
+import { NoopAnalyticsAdapter, OpenPanelAnalyticsAdapter } from '../../src/index.js';
+import type { AnalyticsEvents, AnalyticsPort } from '../../src/index.js';
 
 const API_URL = 'https://analytics.example.com/api';
 
