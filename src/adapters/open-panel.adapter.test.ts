@@ -17,28 +17,28 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should apply global properties from the config', () => {
-        // Given / When — an adapter created with global properties
+        // Given - an adapter created with global properties
         const analytics = new OpenPanelAnalyticsAdapter({
             clientId: 'client-id',
             globalProperties: { app: 'jterrazz-web' },
         });
 
-        // Then — the properties are set on the client
+        // Then - the properties are set on the client
         expect(analytics).toBeInstanceOf(OpenPanelAnalyticsAdapter);
         expect(setGlobalPropertiesSpy).toHaveBeenCalledWith({ app: 'jterrazz-web' });
     });
 
     test('should track an event with profile and properties', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — tracking an event scoped to a profile
+        // When - tracking an event scoped to a profile
         await analytics.track('article_read', {
             profileId: 'user-1',
             properties: { slug: 'hello-world' },
         });
 
-        // Then — properties and profileId are merged into the SDK payload
+        // Then - properties and profileId are merged into the SDK payload
         expect(trackSpy).toHaveBeenCalledWith('article_read', {
             profileId: 'user-1',
             slug: 'hello-world',
@@ -46,10 +46,10 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should track a page view as a screen_view event', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — tracking a page view
+        // When - tracking a page view
         await analytics.page(
             {
                 referrer: 'https://google.com',
@@ -59,7 +59,7 @@ describe('openPanelAnalyticsAdapter', () => {
             { profileId: 'user-1' },
         );
 
-        // Then — the page maps to OpenPanel's reserved screen_view properties
+        // Then - the page maps to OpenPanel's reserved screen_view properties
         expect(trackSpy).toHaveBeenCalledWith('screen_view', {
             __path: 'https://example.com/articles/hello?utm_source=x',
             __referrer: 'https://google.com',
@@ -69,13 +69,13 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should omit undefined page fields', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — tracking a page view with only a url
+        // When - tracking a page view with only a url
         await analytics.page({ url: 'https://example.com/' });
 
-        // Then — no undefined __title/__referrer keys are sent
+        // Then - no undefined __title/__referrer keys are sent
         expect(trackSpy).toHaveBeenCalledWith('screen_view', {
             __path: 'https://example.com/',
             profileId: undefined,
@@ -83,13 +83,13 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should track revenue in EUR by default', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — tracking revenue without a currency
+        // When - tracking revenue without a currency
         await analytics.revenue(29.99, { profileId: 'user-1' });
 
-        // Then — the reserved revenue event carries the amount and EUR
+        // Then - the reserved revenue event carries the amount and EUR
         expect(trackSpy).toHaveBeenCalledWith('revenue', {
             __revenue: 29.99,
             currency: 'EUR',
@@ -98,16 +98,16 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should track revenue with an explicit currency and properties', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — tracking revenue in USD with extra properties
+        // When - tracking revenue in USD with extra properties
         await analytics.revenue(100, {
             currency: 'USD',
             properties: { product: 'pro-plan' },
         });
 
-        // Then — currency and properties are forwarded
+        // Then - currency and properties are forwarded
         expect(trackSpy).toHaveBeenCalledWith('revenue', {
             __revenue: 100,
             currency: 'USD',
@@ -117,10 +117,10 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should identify a profile and flatten codified traits into properties', async () => {
-        // Given — an adapter and a profile using codified Segment-style traits
+        // Given - an adapter and a profile using codified Segment-style traits
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — identifying the profile
+        // When - identifying the profile
         await analytics.identify({
             createdAt: new Date('2026-01-15T10:00:00.000Z'),
             email: 'user@example.com',
@@ -131,7 +131,7 @@ describe('openPanelAnalyticsAdapter', () => {
             username: 'jean',
         });
 
-        // Then — native OpenPanel fields stay top-level, other traits join properties
+        // Then - native OpenPanel fields stay top-level, other traits join properties
         expect(identifySpy).toHaveBeenCalledWith({
             avatar: undefined,
             email: 'user@example.com',
@@ -148,14 +148,14 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should increment and decrement profile counters', async () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — incrementing and decrementing counters
+        // When - incrementing and decrementing counters
         await analytics.increment('logins', { profileId: 'user-1' });
         await analytics.decrement('credits', { profileId: 'user-1', value: 2 });
 
-        // Then — payloads follow the SDK shape
+        // Then - payloads follow the SDK shape
         expect(incrementSpy).toHaveBeenCalledWith({
             profileId: 'user-1',
             property: 'logins',
@@ -169,25 +169,25 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should create an independent child scope', () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — creating a request-scoped child
+        // When - creating a request-scoped child
         const child = analytics.child({ ip: '1.2.3.4', userAgent: 'Mozilla/5.0' });
 
-        // Then — the child is a separate adapter instance
+        // Then - the child is a separate adapter instance
         expect(child).toBeInstanceOf(OpenPanelAnalyticsAdapter);
         expect(child).not.toBe(analytics);
     });
 
     test('should forward global properties set after construction', () => {
-        // Given — an adapter
+        // Given - an adapter
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
-        // When — setting global properties
+        // When - setting global properties
         analytics.setGlobalProperties({ version: '1.0.0' });
 
-        // Then — they are forwarded to the client
+        // Then - they are forwarded to the client
         expect(setGlobalPropertiesSpy).toHaveBeenCalledWith({ version: '1.0.0' });
     });
 });
