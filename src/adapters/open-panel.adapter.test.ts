@@ -1,23 +1,25 @@
 import { OpenPanel } from '@openpanel/sdk';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { OpenPanelAnalyticsAdapter } from './open-panel.adapter.js';
 
-const trackSpy = vi.spyOn(OpenPanel.prototype, 'track').mockResolvedValue();
-const identifySpy = vi.spyOn(OpenPanel.prototype, 'identify').mockResolvedValue();
-const incrementSpy = vi.spyOn(OpenPanel.prototype, 'increment').mockResolvedValue();
-const decrementSpy = vi.spyOn(OpenPanel.prototype, 'decrement').mockResolvedValue();
-const setGlobalPropertiesSpy = vi
-    .spyOn(OpenPanel.prototype, 'setGlobalProperties')
-    .mockReturnValue();
+/**
+ * Doubles the one collaborator the adapter is not handed: the SDK client it
+ * constructs itself. The preset restores every spy after each test, so the
+ * scope is taken inside the test that needs it, never once for the file.
+ */
+const spyOnClient = () => ({
+    decrement: vi.spyOn(OpenPanel.prototype, 'decrement').mockResolvedValue(),
+    identify: vi.spyOn(OpenPanel.prototype, 'identify').mockResolvedValue(),
+    increment: vi.spyOn(OpenPanel.prototype, 'increment').mockResolvedValue(),
+    setGlobalProperties: vi.spyOn(OpenPanel.prototype, 'setGlobalProperties').mockReturnValue(),
+    track: vi.spyOn(OpenPanel.prototype, 'track').mockResolvedValue(),
+});
 
 describe('openPanelAnalyticsAdapter', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
     test('should apply global properties from the config', () => {
-        // Given - an adapter created with global properties
+        // Given - an adapter created with global properties, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({
             clientId: 'client-id',
             globalProperties: { app: 'jterrazz-web' },
@@ -25,11 +27,12 @@ describe('openPanelAnalyticsAdapter', () => {
 
         // Then - the properties are set on the client
         expect(analytics).toBeInstanceOf(OpenPanelAnalyticsAdapter);
-        expect(setGlobalPropertiesSpy).toHaveBeenCalledWith({ app: 'jterrazz-web' });
+        expect(client.setGlobalProperties).toHaveBeenCalledWith({ app: 'jterrazz-web' });
     });
 
     test('should track an event with profile and properties', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - tracking an event scoped to a profile
@@ -39,14 +42,15 @@ describe('openPanelAnalyticsAdapter', () => {
         });
 
         // Then - properties and profileId are merged into the SDK payload
-        expect(trackSpy).toHaveBeenCalledWith('article_read', {
+        expect(client.track).toHaveBeenCalledWith('article_read', {
             profileId: 'user-1',
             slug: 'hello-world',
         });
     });
 
     test('should track a page view as a screen_view event', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - tracking a page view
@@ -60,7 +64,7 @@ describe('openPanelAnalyticsAdapter', () => {
         );
 
         // Then - the page maps to OpenPanel's reserved screen_view properties
-        expect(trackSpy).toHaveBeenCalledWith('screen_view', {
+        expect(client.track).toHaveBeenCalledWith('screen_view', {
             __path: 'https://example.com/articles/hello?utm_source=x',
             __referrer: 'https://google.com',
             __title: 'Hello World',
@@ -69,28 +73,30 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should omit undefined page fields', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - tracking a page view with only a url
         await analytics.page({ url: 'https://example.com/' });
 
         // Then - no undefined __title/__referrer keys are sent
-        expect(trackSpy).toHaveBeenCalledWith('screen_view', {
+        expect(client.track).toHaveBeenCalledWith('screen_view', {
             __path: 'https://example.com/',
             profileId: undefined,
         });
     });
 
     test('should track revenue in EUR by default', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - tracking revenue without a currency
         await analytics.revenue(29.99, { profileId: 'user-1' });
 
         // Then - the reserved revenue event carries the amount and EUR
-        expect(trackSpy).toHaveBeenCalledWith('revenue', {
+        expect(client.track).toHaveBeenCalledWith('revenue', {
             __revenue: 29.99,
             currency: 'EUR',
             profileId: 'user-1',
@@ -98,7 +104,8 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should track revenue with an explicit currency and properties', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - tracking revenue in USD with extra properties
@@ -108,7 +115,7 @@ describe('openPanelAnalyticsAdapter', () => {
         });
 
         // Then - currency and properties are forwarded
-        expect(trackSpy).toHaveBeenCalledWith('revenue', {
+        expect(client.track).toHaveBeenCalledWith('revenue', {
             __revenue: 100,
             currency: 'USD',
             product: 'pro-plan',
@@ -117,7 +124,8 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should identify a profile and flatten codified traits into properties', async () => {
-        // Given - an adapter and a profile using codified Segment-style traits
+        // Given - an adapter and a profile using codified Segment-style traits, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - identifying the profile
@@ -132,7 +140,7 @@ describe('openPanelAnalyticsAdapter', () => {
         });
 
         // Then - native OpenPanel fields stay top-level, other traits join properties
-        expect(identifySpy).toHaveBeenCalledWith({
+        expect(client.identify).toHaveBeenCalledWith({
             avatar: undefined,
             email: 'user@example.com',
             firstName: 'Jean',
@@ -148,7 +156,8 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should increment and decrement profile counters', async () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - incrementing and decrementing counters
@@ -156,12 +165,12 @@ describe('openPanelAnalyticsAdapter', () => {
         await analytics.decrement('credits', { profileId: 'user-1', value: 2 });
 
         // Then - payloads follow the SDK shape
-        expect(incrementSpy).toHaveBeenCalledWith({
+        expect(client.increment).toHaveBeenCalledWith({
             profileId: 'user-1',
             property: 'logins',
             value: undefined,
         });
-        expect(decrementSpy).toHaveBeenCalledWith({
+        expect(client.decrement).toHaveBeenCalledWith({
             profileId: 'user-1',
             property: 'credits',
             value: 2,
@@ -181,13 +190,14 @@ describe('openPanelAnalyticsAdapter', () => {
     });
 
     test('should forward global properties set after construction', () => {
-        // Given - an adapter
+        // Given - an adapter, on a doubled SDK client
+        const client = spyOnClient();
         const analytics = new OpenPanelAnalyticsAdapter({ clientId: 'client-id' });
 
         // When - setting global properties
         analytics.setGlobalProperties({ version: '1.0.0' });
 
         // Then - they are forwarded to the client
-        expect(setGlobalPropertiesSpy).toHaveBeenCalledWith({ version: '1.0.0' });
+        expect(client.setGlobalProperties).toHaveBeenCalledWith({ version: '1.0.0' });
     });
 });
