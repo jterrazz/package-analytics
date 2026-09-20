@@ -19,6 +19,9 @@
     "publishConfig": {
         "registry": "https://registry.npmjs.org/"
     },
+    "engines": {
+        "node": ">=24"
+    },
     "scripts": {
         "build": "typescript bundle",
         "lint": "typescript check",
