@@ -22,7 +22,10 @@ type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
     page: (page: AnalyticsPage, options?: AnalyticsPageOptions) => Promise<void>;
     revenue: (amount: number, options?: AnalyticsRevenueOptions) => Promise<void>;
     setGlobalProperties: (properties: Record<string, unknown>) => void;
-    track: (event: keyof TEvents & string, options?: AnalyticsTrackOptions) => Promise<void>;
+    track: <TEvent extends keyof TEvents & string>(
+        event: TEvent,
+        options?: AnalyticsTrackOptions<TEvents[TEvent]>,
+    ) => Promise<void>;
 };
 ```
 
@@ -42,10 +45,10 @@ type AnalyticsCounterOptions = { profileId: string; value?: number };
 
 ## Typed event catalogue (tracking plan)
 
-Each app declares its events as a type — unknown events fail at compile time:
+Each app declares its events as a plain object type — an unknown event, or a property its event does not declare, fails at compile time. Never write it `AnalyticsEvents & { … }` or `interface AppEvents extends AnalyticsEvents`: both carry the catalogue's string index, so every name type-checks:
 
 ```typescript
-type AppEvents = AnalyticsEvents & {
+type AppEvents = {
     app_link_opened: { platform: 'android' | 'desktop' | 'ios'; slug: string };
 };
 const analytics: AnalyticsPort<AppEvents> = new OpenPanelAnalyticsAdapter<AppEvents>({ ... });

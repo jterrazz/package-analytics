@@ -1,13 +1,27 @@
-# @jterrazz/analytics — documentation
+# @jterrazz/analytics — the manual
 
-The manual of this package: what it is, how it is changed, what proves a change, and how it ships. `README.md` at the repository root is the vitrine; `AGENTS.md`/`CLAUDE.md` route into this corpus and author nothing themselves.
+Vendor-neutral product analytics for Node.js apps: one port, pluggable adapters. What the package is and how an app starts using it is the repository's README; this page lists every page of the manual, by what the reader came to do.
 
-| Chapter                                  | Holds                                                                                             |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [01-architecture.md](01-architecture.md) | The port/adapter shape, the two adapters, what the port deliberately excludes, the public surface |
-| [02-developing.md](02-developing.md)     | The toolchain, the commands, where a new adapter's files go                                       |
-| [03-testing.md](03-testing.md)           | The sibling adapter tests and the cross-adapter integration suite, what each proves               |
-| [04-operating.md](04-operating.md)       | How this package is released: what a merge does, what a GitHub Release triggers                   |
-| [05-adapters.md](05-adapters.md)         | `OpenPanelAnalyticsAdapter` and `NoopAnalyticsAdapter` in depth, and how to add a third           |
+## Guides
 
-The decisions this package alone took stand in [decisions/](decisions/), numbered and chronological, the mold `_template.md` beside them. A decision spanning several repositories is not one of them.
+| Page                         | Answers                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| [Develop](guides/develop.md) | Changing the package: the declaration, the gestures, where a new file goes, what it owes |
+| [Test](guides/test.md)       | Proving a change: the specs that install the tarball, the ingest they read, the mutants  |
+| [Release](guides/release.md) | How the package is published, and who cuts a release                                     |
+
+## Concepts
+
+| Page                                     | Answers                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| [Architecture](concepts/architecture.md) | The port, the adapters, what the port deliberately excludes, the public surface |
+
+## Reference
+
+| Page                              | Answers                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| [Adapters](reference/adapters.md) | Each adapter's configuration, what it sends for each port call, and request scopes |
+
+## Decisions
+
+The records of decisions this package alone took are in [`decisions/`](decisions/), numbered in the order they were taken, the mold `_template.md` beside them. A decision spanning several repositories is recorded by the corpus that spans them.

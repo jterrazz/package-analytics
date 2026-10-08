@@ -1,6 +1,6 @@
 # @jterrazz/analytics
 
-Vendor-neutral product analytics for Node.js and TypeScript apps, with pluggable adapters.
+Vendor-neutral product analytics for Node.js apps, with pluggable adapters.
 
 ## Installation
 
@@ -25,19 +25,17 @@ await analytics.track('article_shared', {
 });
 ```
 
-Declare your tracking plan as a type to get compile-time safety on event names — see [Architecture](docs/01-architecture.md).
+Declare your tracking plan as a type to get compile-time safety on event names — see [Architecture](docs/concepts/architecture.md).
 
 ## Documentation
 
-The full corpus lives in [`docs/`](docs/):
+The manual lives in [`docs/`](docs/README.md):
 
-- [Architecture](docs/01-architecture.md) — the port, the adapters, the public surface.
-- [Developing](docs/02-developing.md) — the toolchain, where a new adapter's files go.
-- [Testing](docs/03-testing.md) — the sibling tests and the integration suite.
-- [Operating](docs/04-operating.md) — what publishes this package, and what a merge does not do.
-- [Adapters](docs/05-adapters.md) — `OpenPanelAnalyticsAdapter` and `NoopAnalyticsAdapter` in depth: config, event mapping, request scopes.
+- [Architecture](docs/concepts/architecture.md) — the port, the adapters, the public surface.
+- [Adapters](docs/reference/adapters.md) — `OpenPanelAnalyticsAdapter` and `NoopAnalyticsAdapter` in depth: config, what each call sends, request scopes.
+- [Develop](docs/guides/develop.md), [Test](docs/guides/test.md) and [Release](docs/guides/release.md) — changing, proving and shipping the package.
 
-For agents: read the chapters straight from the repo, plus [`skills/jterrazz-analytics`](skills/jterrazz-analytics/SKILL.md).
+For agents: read the pages straight from the repo, plus [`skills/jterrazz-analytics`](skills/jterrazz-analytics/SKILL.md).
 
 ## License
 
