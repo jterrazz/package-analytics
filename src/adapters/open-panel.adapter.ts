@@ -1,6 +1,5 @@
 import { OpenPanel } from '@openpanel/sdk';
 
-// Ports
 import type {
     AnalyticsContext,
     AnalyticsCounterOptions,
@@ -19,7 +18,6 @@ function withoutUndefined(values: Record<string, unknown>): Record<string, unkno
     return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined));
 }
 
-/** An absent context field and an empty one are the same thing: nothing to forward. */
 function isStated(value: string | undefined): value is string {
     return value !== undefined && value !== '';
 }
@@ -33,13 +31,7 @@ export type OpenPanelAnalyticsConfig = {
     globalProperties?: Record<string, unknown>;
 };
 
-/**
- * OpenPanel analytics adapter backed by @openpanel/sdk.
- *
- * `child(context)` forwards the end user's IP and user-agent as request
- * headers, so the OpenPanel backend derives geolocation, device, browser
- * and OS exactly as it does for browser events.
- */
+/** OpenPanel analytics adapter backed by @openpanel/sdk; `child(context)` forwards the end user's IP and user-agent so the backend derives geolocation and device. */
 export class OpenPanelAnalyticsAdapter<
     TEvents extends AnalyticsEvents = AnalyticsEvents,
 > implements AnalyticsPort<TEvents> {

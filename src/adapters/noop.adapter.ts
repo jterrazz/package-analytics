@@ -1,4 +1,3 @@
-// Ports
 import type {
     AnalyticsContext,
     AnalyticsCounterOptions,
@@ -11,10 +10,7 @@ import type {
     AnalyticsTrackOptions,
 } from '../ports/analytics.js';
 
-/**
- * No-op analytics adapter that implements AnalyticsPort but performs no operations.
- * This is useful for local development and tests where events should not be sent.
- */
+/** Analytics adapter that sends nothing, for local development and a consumer's tests. */
 export class NoopAnalyticsAdapter<
     TEvents extends AnalyticsEvents = AnalyticsEvents,
 > implements AnalyticsPort<TEvents> {
@@ -22,34 +18,20 @@ export class NoopAnalyticsAdapter<
         return this;
     }
 
-    async decrement(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
-        // No operation
-    }
+    async decrement(_property: string, _options: AnalyticsCounterOptions): Promise<void> {}
 
-    async identify(_profile: AnalyticsProfile): Promise<void> {
-        // No operation
-    }
+    async identify(_profile: AnalyticsProfile): Promise<void> {}
 
-    async increment(_property: string, _options: AnalyticsCounterOptions): Promise<void> {
-        // No operation
-    }
+    async increment(_property: string, _options: AnalyticsCounterOptions): Promise<void> {}
 
-    async page(_page: AnalyticsPage, _options?: AnalyticsPageOptions): Promise<void> {
-        // No operation
-    }
+    async page(_page: AnalyticsPage, _options?: AnalyticsPageOptions): Promise<void> {}
 
-    async revenue(_amount: number, _options?: AnalyticsRevenueOptions): Promise<void> {
-        // No operation
-    }
+    async revenue(_amount: number, _options?: AnalyticsRevenueOptions): Promise<void> {}
 
-    setGlobalProperties(_properties: Record<string, unknown>): void {
-        // No operation
-    }
+    setGlobalProperties(_properties: Record<string, unknown>): void {}
 
     async track<TEvent extends keyof TEvents & string>(
         _event: TEvent,
         _options?: AnalyticsTrackOptions<TEvents[TEvent]>,
-    ): Promise<void> {
-        // No operation
-    }
+    ): Promise<void> {}
 }

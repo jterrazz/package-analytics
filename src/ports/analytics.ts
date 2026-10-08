@@ -1,17 +1,4 @@
-/**
- * Analytics port - defines how to track product events, page views, revenue
- * and user profiles, independently of any analytics vendor.
- *
- * Deliberately NOT part of this port: sessions, bounce rate, geolocation,
- * device detection and UTM attribution — analytics backends derive all of
- * these server-side from the request context (`ip`, `userAgent`) and the
- * page URL. The port exposes the inputs, never the derived outputs.
- */
-
-/**
- * Request-scoped context. Backends derive geolocation from `ip` and
- * device/browser/OS from `userAgent`.
- */
+/** Request-scoped context: backends derive geolocation from `ip` and device, browser and OS from `userAgent`. */
 export type AnalyticsContext = {
     /** Anonymous device identity shared with the web client */
     deviceId?: string;
@@ -30,16 +17,10 @@ export type AnalyticsCounterOptions = {
     value?: number;
 };
 
-/**
- * Event catalogue: event name → typed properties. Apps extend this to get
- * a compile-time tracking plan.
- */
+/** Event catalogue, event name to typed properties: an app extends it to get a compile-time tracking plan. */
 export type AnalyticsEvents = Record<string, Record<string, unknown>>;
 
-/**
- * A viewed page. Backends extract path, origin, query and UTM attribution
- * from the full `url`.
- */
+/** A viewed page: backends extract path, origin, query and UTM attribution from the full `url`. */
 export type AnalyticsPage = {
     referrer?: string;
     title?: string;
@@ -47,46 +28,30 @@ export type AnalyticsPage = {
     url: string;
 };
 
+/** How an app tracks product events, page views, revenue and user profiles, whatever the analytics vendor. */
 export type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
-    /**
-     * Create an analytics scope bound to a request context — events sent
-     * through the child inherit the context
-     */
+    /** Create an analytics scope bound to a request context: events sent through the child inherit the context */
     child: (context: AnalyticsContext) => AnalyticsPort<TEvents>;
 
-    /**
-     * Decrement a numeric property on a user profile
-     */
+    /** Decrement a numeric property on a user profile */
     decrement: (property: string, options: AnalyticsCounterOptions) => Promise<void>;
 
-    /**
-     * Attach identity and traits to a user profile
-     */
+    /** Attach identity and traits to a user profile */
     identify: (profile: AnalyticsProfile) => Promise<void>;
 
-    /**
-     * Increment a numeric property on a user profile
-     */
+    /** Increment a numeric property on a user profile */
     increment: (property: string, options: AnalyticsCounterOptions) => Promise<void>;
 
-    /**
-     * Track a page view
-     */
+    /** Track a page view */
     page: (page: AnalyticsPage, options?: AnalyticsPageOptions) => Promise<void>;
 
-    /**
-     * Track revenue, in the given currency (defaults to EUR)
-     */
+    /** Track revenue, in the given currency (defaults to EUR) */
     revenue: (amount: number, options?: AnalyticsRevenueOptions) => Promise<void>;
 
-    /**
-     * Set properties sent with every subsequent event
-     */
+    /** Set properties sent with every subsequent event */
     setGlobalProperties: (properties: Record<string, unknown>) => void;
 
-    /**
-     * Track a named event, optionally scoped to a user profile
-     */
+    /** Track a named event, optionally scoped to a user profile */
     track: <TEvent extends keyof TEvents & string>(
         event: TEvent,
         options?: AnalyticsTrackOptions<TEvents[TEvent]>,
@@ -97,10 +62,7 @@ export type AnalyticsPageOptions = {
     profileId?: string;
 };
 
-/**
- * User profile. The codified traits follow the Segment identify spec;
- * anything else goes into `properties`.
- */
+/** User profile: the codified traits follow the Segment identify spec, anything else goes into `properties`. */
 export type AnalyticsProfile = {
     avatar?: string;
     /** Account creation date — enables cohort analysis */
