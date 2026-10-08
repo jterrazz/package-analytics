@@ -14,8 +14,14 @@ import type {
 
 const DEFAULT_CURRENCY = 'EUR';
 
-function withoutUndefined(values: Record<string, unknown>): Record<string, unknown> {
-    return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined));
+function withoutUndefined<TValue>(
+    values: Record<string, TValue>,
+): Record<string, Exclude<TValue, undefined>> {
+    return Object.fromEntries(
+        Object.entries(values).filter(
+            (entry): entry is [string, Exclude<TValue, undefined>] => entry[1] !== undefined,
+        ),
+    );
 }
 
 function isStated(value: string | undefined): value is string {
@@ -39,100 +45,75 @@ export class OpenPanelAnalyticsAdapter<
     private readonly config: OpenPanelAnalyticsConfig;
 
     constructor(config: OpenPanelAnalyticsConfig) {
+        const { apiUrl, clientId, clientSecret, globalProperties } = config;
         this.config = config;
-        this.client = new OpenPanel({
-            ...(config.apiUrl !== undefined && { apiUrl: config.apiUrl }),
-            ...(config.clientSecret !== undefined && { clientSecret: config.clientSecret }),
-            clientId: config.clientId,
-        });
-
-        if (config.globalProperties) {
-            this.client.setGlobalProperties(config.globalProperties);
-        }
+        this.client = new OpenPanel({ clientId, ...withoutUndefined({ apiUrl, clientSecret }) });
+        this.client.setGlobalProperties({ ...globalProperties });
     }
 
     child(context: AnalyticsContext): AnalyticsPort<TEvents> {
+        const { deviceId, ip, locale, profileId, userAgent } = context;
         const child = new OpenPanelAnalyticsAdapter<TEvents>(this.config);
 
-        if (this.client.global) {
-            child.client.setGlobalProperties(this.client.global);
+        child.client.setGlobalProperties({
+            ...this.client.global,
+            ...(isStated(deviceId) && { __deviceId: deviceId }),
+            ...(isStated(locale) && { locale }),
+        });
+
+        if (isStated(ip)) {
+            child.client.api.addHeader('openpanel-client-ip', ip);
         }
 
-        if (isStated(context.ip)) {
-            child.client.api.addHeader('openpanel-client-ip', context.ip);
+        if (isStated(userAgent)) {
+            child.client.api.addHeader('user-agent', userAgent);
         }
 
-        if (isStated(context.userAgent)) {
-            child.client.api.addHeader('user-agent', context.userAgent);
-        }
-
-        if (isStated(context.profileId)) {
-            child.client.profileId = context.profileId;
-        }
-
-        const contextProperties: Record<string, unknown> = {
-            ...(isStated(context.deviceId) && { __deviceId: context.deviceId }),
-            ...(isStated(context.locale) && { locale: context.locale }),
-        };
-
-        if (Object.keys(contextProperties).length > 0) {
-            child.client.setGlobalProperties(contextProperties);
+        if (isStated(profileId)) {
+            child.client.profileId = profileId;
         }
 
         return child;
     }
 
     async decrement(property: string, options: AnalyticsCounterOptions): Promise<void> {
-        await this.client.decrement({
-            ...(options.value !== undefined && { value: options.value }),
-            profileId: options.profileId,
-            property,
-        });
+        await this.client.decrement({ ...options, property });
     }
 
     async identify(profile: AnalyticsProfile): Promise<void> {
-        const { avatar, email, firstName, lastName, profileId, properties, ...traits } = profile;
+        const { avatar, createdAt, email, firstName, lastName, profileId, properties, ...traits } =
+            profile;
 
         await this.client.identify({
-            ...(avatar !== undefined && { avatar }),
-            ...(email !== undefined && { email }),
-            ...(firstName !== undefined && { firstName }),
-            ...(lastName !== undefined && { lastName }),
+            ...withoutUndefined({ avatar, email, firstName, lastName }),
             profileId,
             properties: {
                 ...properties,
-                ...withoutUndefined({
-                    ...traits,
-                    createdAt: traits.createdAt?.toISOString(),
-                }),
+                ...withoutUndefined({ ...traits, createdAt: createdAt?.toISOString() }),
             },
         });
     }
 
     async increment(property: string, options: AnalyticsCounterOptions): Promise<void> {
-        await this.client.increment({
-            ...(options.value !== undefined && { value: options.value }),
-            profileId: options.profileId,
-            property,
-        });
+        await this.client.increment({ ...options, property });
     }
 
     async page(page: AnalyticsPage, options?: AnalyticsPageOptions): Promise<void> {
         await this.client.track('screen_view', {
-            ...withoutUndefined({
-                __path: page.url,
-                __referrer: page.referrer,
-                __title: page.title,
-            }),
-            ...(options?.profileId !== undefined && { profileId: options.profileId }),
+            __path: page.url,
+            __referrer: page.referrer,
+            __title: page.title,
+            ...options,
         });
     }
 
-    async revenue(amount: number, options?: AnalyticsRevenueOptions): Promise<void> {
+    async revenue(amount: number, options: AnalyticsRevenueOptions = {}): Promise<void> {
+        const { currency = DEFAULT_CURRENCY, properties, ...scope } = options;
+
         await this.client.track('revenue', {
-            currency: options?.currency ?? DEFAULT_CURRENCY,
-            ...options?.properties,
-            ...(options?.profileId !== undefined && { profileId: options.profileId }),
+            currency,
+            ...properties,
+            ...scope,
             __revenue: amount,
         });
     }
@@ -143,11 +124,10 @@ export class OpenPanelAnalyticsAdapter<
 
     async track<TEvent extends keyof TEvents & string>(
         event: TEvent,
-        options?: AnalyticsTrackOptions<TEvents[TEvent]>,
+        options: AnalyticsTrackOptions<TEvents[TEvent]> = {},
     ): Promise<void> {
-        await this.client.track(event, {
-            ...options?.properties,
-            ...(options?.profileId !== undefined && { profileId: options.profileId }),
-        });
+        const { properties, ...scope } = options;
+
+        await this.client.track(event, { ...properties, ...scope });
     }
 }

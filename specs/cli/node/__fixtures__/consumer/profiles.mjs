@@ -10,6 +10,7 @@ await analytics.increment('logins', { profileId: 'user-1' });
 await analytics.decrement('credits', { profileId: 'user-1', value: 2 });
 await analytics.identify({
     avatar: 'https://shop.example/avatars/jean.png',
+    company: 'Terrazzoni SAS',
     createdAt: new Date('2026-01-15T10:00:00.000Z'),
     email: 'jean@shop.example',
     firstName: 'Jean',
@@ -24,6 +25,6 @@ await analytics.identify({
 });
 await analytics.identify({
     profileId: 'user-2',
-    properties: { plan: 'free' },
+    properties: { createdAt: '2025-06-01T00:00:00.000Z', plan: 'free' },
 });
 await analytics.track('article_read');
