@@ -33,15 +33,17 @@ The request scope `child` takes, and the counter options `increment`/`decrement`
 
 ```typescript
 type AnalyticsContext = {
-    deviceId?: string;
-    ip?: string;
-    locale?: string;
-    profileId?: string;
-    userAgent?: string;
+    deviceId?: string | undefined;
+    ip?: string | undefined;
+    locale?: string | undefined;
+    profileId?: string | undefined;
+    userAgent?: string | undefined;
 };
 
-type AnalyticsCounterOptions = { profileId: string; value?: number };
+type AnalyticsCounterOptions = { profileId: string; value?: number | undefined };
 ```
+
+Every optional input of the port takes `undefined` as absent, so `process.env.X` or `session?.userId` passes as it comes under `exactOptionalPropertyTypes`.
 
 ## Typed event catalogue (tracking plan)
 
@@ -82,7 +84,12 @@ const requestAnalytics = analytics.child({
     profileId: session?.userId, // links the event to the user's active web session
 });
 await requestAnalytics.track('subscription_started', { properties: { plan: 'pro' } });
+if (session) {
+    await requestAnalytics.identify({ email: session.email, profileId: session.userId }); // on the scope, never the shared root
+}
 ```
+
+A child of a child keeps its parent's context and replaces only the fields it states.
 
 ## Rules
 
@@ -90,6 +97,7 @@ await requestAnalytics.track('subscription_started', { properties: { plan: 'pro'
 - Depend on `AnalyticsPort` in services; inject the concrete adapter at the composition root.
 - Event names: `object_action`, snake_case, past tense (`user_signed_up`, `article_shared`). Static names only — data goes in properties, never in the name.
 - Do NOT send UTM, geo, device or session data as properties: the backend derives UTM from `page().url`, geo from `ip`, device from `userAgent`, and computes sessions/bounce itself.
+- On a server, call `identify` only on a request scope (`analytics.child(...)`), never on the shared root adapter: identify binds every later event of that adapter to the profile, so every anonymous event from every later request would be attributed to that user.
 - `revenue()` requires the `clientSecret` (server-side only), default currency EUR.
 - `profileId` is your database id — never the email (email is a trait on `identify`).
 - Browser-side tracking on the jterrazz stack uses `@openpanel/nextjs` (`OpenPanelComponent`) with the same `apiUrl`/`clientId`; it powers sessions and bounce rate. Server events join those sessions via a shared `profileId`.
