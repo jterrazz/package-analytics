@@ -28,12 +28,15 @@ function isStated(value: string | undefined): value is string {
     return value !== undefined && value !== '';
 }
 
+/** Which OpenPanel project the adapter sends to, and what every event carries; nothing else reaches the SDK. */
 export type OpenPanelAnalyticsConfig = {
     /** Event ingest endpoint of a self-hosted instance; omit for OpenPanel cloud */
     apiUrl?: string | undefined;
+    /** Client id of the OpenPanel project */
     clientId: string;
     /** Required for server-side tracking and revenue events */
     clientSecret?: string | undefined;
+    /** Sent with every event, as setGlobalProperties would */
     globalProperties?: Record<string, unknown> | undefined;
 };
 

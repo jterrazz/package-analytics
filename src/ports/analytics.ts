@@ -12,8 +12,11 @@ export type AnalyticsContext = {
     userAgent?: string | undefined;
 };
 
+/** Which profile's numeric property moves, and by how much. */
 export type AnalyticsCounterOptions = {
+    /** Profile whose property moves */
     profileId: string;
+    /** Amount to move it by; the backend's own default (1 on OpenPanel) when omitted */
     value?: number | undefined;
 };
 
@@ -22,7 +25,9 @@ export type AnalyticsEvents = Record<string, Record<string, unknown>>;
 
 /** A viewed page: backends extract path, origin, query and UTM attribution from the full `url`. */
 export type AnalyticsPage = {
+    /** URL the visitor came from */
     referrer?: string | undefined;
+    /** Title of the page */
     title?: string | undefined;
     /** Full URL, including query string */
     url: string;
@@ -58,12 +63,15 @@ export type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
     ) => Promise<void>;
 };
 
+/** Who viewed the page. */
 export type AnalyticsPageOptions = {
+    /** Overrides the scope's profile for this page view */
     profileId?: string | undefined;
 };
 
 /** User profile: the codified traits follow the Segment identify spec, anything else goes into `properties`. */
 export type AnalyticsProfile = {
+    /** URL of the profile picture */
     avatar?: string | undefined;
     /** Account creation date — enables cohort analysis */
     createdAt?: Date | undefined;
@@ -75,22 +83,30 @@ export type AnalyticsProfile = {
     phone?: string | undefined;
     /** Subscription plan, e.g. 'free', 'pro' */
     plan?: string | undefined;
+    /** The app's own user id, never the email */
     profileId: string;
+    /** Any other trait; a codified trait of the same name wins */
     properties?: Record<string, unknown> | undefined;
     username?: string | undefined;
     website?: string | undefined;
 };
 
+/** Who paid, in which currency, and what else the revenue event carries. */
 export type AnalyticsRevenueOptions = {
     /** ISO 4217 currency code */
     currency?: string | undefined;
+    /** Overrides the scope's profile for this event */
     profileId?: string | undefined;
+    /** Sent with the event, beside the currency and amount */
     properties?: Record<string, unknown> | undefined;
 };
 
+/** Who triggered the event, and the properties its tracking plan declares. */
 export type AnalyticsTrackOptions<
     TProperties extends Record<string, unknown> = Record<string, unknown>,
 > = {
+    /** Overrides the scope's profile for this event */
     profileId?: string | undefined;
+    /** The event's properties, as the tracking plan types them */
     properties?: TProperties | undefined;
 };
