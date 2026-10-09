@@ -30,7 +30,7 @@ The two implementations of `AnalyticsPort` this package ships, and what each sen
 
 ### `child(context)`
 
-Builds a new adapter over the same config, carrying the parent's global properties, then layers the request context onto it alone: `ip` becomes the `openpanel-client-ip` header and `userAgent` the `user-agent` header, `profileId` is the profile of every event that names none, and `deviceId` and `locale` join the properties as `__deviceId` and `locale`. A field absent or an empty string is sent as nothing. The parent is left untouched, which is what lets a server hold one long-lived adapter and derive a fresh child per request.
+Builds a new adapter over the same config, carrying the parent's global properties, then layers the request context onto it alone: `ip` becomes the `openpanel-client-ip` header and `userAgent` the `user-agent` header, `profileId` is the profile of every event that names none, and `deviceId` and `locale` join the properties as `__deviceId` and `locale`. A field absent or an empty string is sent as nothing. The parent is left untouched, which is what lets a server hold one long-lived adapter and derive a fresh child per request. A child of a child layers its context over its parent's: a field it leaves out or sends empty keeps the parent scope's value, one it states replaces it. A profile bound by `identify` is not context, and no child inherits it.
 
 Those two headers are why the port takes `ip` and `userAgent` at all: OpenPanel derives geolocation from the former and device, browser and OS from the latter, exactly as it does for a browser-side event — [Architecture](../concepts/architecture.md#the-port) says why those derived facts are never port fields.
 

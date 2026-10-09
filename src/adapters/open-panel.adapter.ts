@@ -43,6 +43,8 @@ export class OpenPanelAnalyticsAdapter<
 > implements AnalyticsPort<TEvents> {
     private readonly client: OpenPanel;
     private readonly config: OpenPanelAnalyticsConfig;
+    private context: AnalyticsContext = {};
+    private parent: OpenPanelAnalyticsAdapter<TEvents> | undefined;
 
     constructor(config: OpenPanelAnalyticsConfig) {
         const { apiUrl, clientId, clientSecret, globalProperties } = config;
@@ -52,8 +54,10 @@ export class OpenPanelAnalyticsAdapter<
     }
 
     child(context: AnalyticsContext): AnalyticsPort<TEvents> {
-        const { deviceId, ip, locale, profileId, userAgent } = context;
+        const { deviceId, locale } = context;
         const child = new OpenPanelAnalyticsAdapter<TEvents>(this.config);
+        child.context = context;
+        child.parent = this;
 
         child.client.setGlobalProperties({
             ...this.client.global,
@@ -61,19 +65,26 @@ export class OpenPanelAnalyticsAdapter<
             ...(isStated(locale) && { locale }),
         });
 
+        child.bindRequest(child.client);
+
+        return child;
+    }
+
+    private bindRequest(client: OpenPanel): void {
+        const { ip, profileId, userAgent } = this.context;
+        this.parent?.bindRequest(client);
+
         if (isStated(ip)) {
-            child.client.api.addHeader('openpanel-client-ip', ip);
+            client.api.addHeader('openpanel-client-ip', ip);
         }
 
         if (isStated(userAgent)) {
-            child.client.api.addHeader('user-agent', userAgent);
+            client.api.addHeader('user-agent', userAgent);
         }
 
         if (isStated(profileId)) {
-            child.client.profileId = profileId;
+            client.profileId = profileId;
         }
-
-        return child;
     }
 
     async decrement(property: string, options: AnalyticsCounterOptions): Promise<void> {

@@ -30,7 +30,7 @@ export type AnalyticsPage = {
 
 /** How an app tracks product events, page views, revenue and user profiles, whatever the analytics vendor. */
 export type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
-    /** Create an analytics scope bound to a request context: events sent through the child inherit the context */
+    /** Create an analytics scope bound to a request context: events sent through the child inherit the context, layered over its parent scope's */
     child: (context: AnalyticsContext) => AnalyticsPort<TEvents>;
 
     /** Decrement a numeric property on a user profile */

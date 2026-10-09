@@ -19,6 +19,9 @@ await request.track('article_read', { properties: { slug: 'hello-world' } });
 await request.track('article_shared', { profileId: 'user-7' });
 await analytics.track('cart_opened');
 
+const translated = request.child({ ip: '198.51.100.23', locale: 'en-GB' });
+await translated.track('article_read');
+
 const blank = analytics.child({ deviceId: '', ip: '', locale: '', profileId: '', userAgent: '' });
 await blank.track('cart_opened');
 
