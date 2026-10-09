@@ -18,7 +18,7 @@ make mutation   # the zero-survivor verdict over the change
 | `events.spec.ts`       | `track`, `page` and `revenue` as the track requests OpenPanel reads, global properties set at construction and later, and the client's credentials as headers                                                                                     |
 | `profiles.spec.ts`     | `increment`, `decrement` and `identify` as profile updates — which fields stay top-level, which join the properties — and identify binding later events                                                                                           |
 | `scopes.spec.ts`       | a `child(context)` sending the visitor's ip, user-agent, profile, device and locale with its events, a nested child keeping what it does not restate, an empty context field sent as nothing, the parent untouched                                |
-| `noop.spec.ts`         | the no-op adapter answers the whole port with nothing, and its child scope is itself                                                                                                                                                              |
+| `noop.spec.ts`         | the no-op adapter's one promise: no event leaves — every port call, through a child scope, after a guard that reports and refuses any outbound request (`offline.mjs`, imported first: `NODE_OPTIONS` is the mutation run's, never a spec's)      |
 
 The specs pack `dist/`, never `src/`: `make test` builds first, but `npx vitest`, or one spec run on its own, straight after an edit tests the previous build — run `make build` before it.
 

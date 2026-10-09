@@ -4,19 +4,15 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 
 describe('noop', () => {
-    test('the no-op adapter answers the whole port and its child scope is itself', async () => {
-        // Given - a consumer's test handing the no-op adapter to its code, every port call made through it
+    test('the no-op adapter lets no event leave the process', async () => {
+        // Given - a consumer's test handing the no-op adapter to its code, every port call made through a request scope, after a guard that reports and refuses every outbound request
         const result = await cli
             .link('@jterrazz/analytics', packed())
             .fixture(directory('./__fixtures__/consumer/'))
             .exec('noop.mjs');
 
-        // Then - every call resolves with nothing, and the child scope is the same adapter
+        // Then - every call resolves, and no request was attempted
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(`
-            the child scope is the adapter itself: true
-            every call answered: undefined, undefined, undefined, undefined, undefined, undefined
-        `);
         expect(result.stderr.text).toBe('');
     });
 });
