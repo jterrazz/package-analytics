@@ -36,7 +36,7 @@ Those two headers are why the port takes `ip` and `userAgent` at all: OpenPanel 
 
 ### The tracking plan
 
-`OpenPanelAnalyticsAdapter<TEvents>` and `NoopAnalyticsAdapter<TEvents>` take the app's plan as a plain object type, `{ user_signed_up: { plan: string } }`: `track` then refuses an event the plan does not declare and a property its event does not allow. A plan written `AnalyticsEvents & { … }`, or an interface extending `AnalyticsEvents`, keeps the catalogue's string index, and every name type-checks.
+`OpenPanelAnalyticsAdapter<TEvents>` and `NoopAnalyticsAdapter<TEvents>` take the app's plan as a plain object type, `{ user_signed_up: { plan: string } }`: `track` then refuses an event the plan does not declare and a property its event does not allow. A plan written `AnalyticsEvents & { … }`, or an interface extending `AnalyticsEvents`, keeps the catalogue's string index, and every name type-checks. The plan is a `type`, not an `interface`: an interface has no implicit index, and fails the adapters' constraint.
 
 ## Related
 

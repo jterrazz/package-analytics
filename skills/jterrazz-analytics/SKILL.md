@@ -45,7 +45,7 @@ type AnalyticsCounterOptions = { profileId: string; value?: number };
 
 ## Typed event catalogue (tracking plan)
 
-Each app declares its events as a plain object type — an unknown event, or a property its event does not declare, fails at compile time. Never write it `AnalyticsEvents & { … }` or `interface AppEvents extends AnalyticsEvents`: both carry the catalogue's string index, so every name type-checks:
+Each app declares its events as a plain object type — an unknown event, or a property its event does not declare, fails at compile time. Never write it `AnalyticsEvents & { … }` or `interface AppEvents extends AnalyticsEvents`: both carry the catalogue's string index, so every name type-checks. A plain `interface` fails the constraint — it must be a `type`:
 
 ```typescript
 type AppEvents = {

@@ -20,7 +20,7 @@ export type AnalyticsCounterOptions = {
     value?: number | undefined;
 };
 
-/** Event catalogue, event name to typed properties: an app extends it to get a compile-time tracking plan. */
+/** The constraint on a tracking plan, event name to typed properties: write the plan as a plain object `type`, e.g. `{ user_signed_up: { plan: string } }`, never as an extension of this one, whose string index lets every name through; an `interface` has no index and fails the constraint (Adapters § The tracking plan). */
 export type AnalyticsEvents = Record<string, Record<string, unknown>>;
 
 /** A viewed page: backends extract path, origin, query and UTM attribution from the full `url`. */

@@ -25,7 +25,7 @@ await analytics.track('article_shared', {
 });
 ```
 
-Declare your tracking plan as a type to get compile-time safety on event names — see [Architecture](docs/concepts/architecture.md).
+Declare your tracking plan as a plain object type to get compile-time safety on event names — see [Adapters § The tracking plan](docs/reference/adapters.md#the-tracking-plan).
 
 ## Documentation
 
