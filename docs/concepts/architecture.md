@@ -4,7 +4,7 @@ One port, and adapters that implement it — vendor-neutral product analytics wi
 
 ## The port
 
-`src/ports/analytics.ts` exports `AnalyticsPort<TEvents>`, the one type an application depends on: `track`, `page`, `revenue`, `identify`, `increment`, `decrement`, `setGlobalProperties`, and `child` for request-scoped instances. `AnalyticsEvents` is the extension point — an app declares its own tracking plan as a type extending it, and `track` narrows `event` to that plan's keys and its properties to that event's shape, so an unknown event name fails at compile time rather than silently reaching a vendor.
+`src/ports/analytics.ts` exports `AnalyticsPort<TEvents>`, the one type an application depends on: `track`, `page`, `revenue`, `identify`, `increment`, `decrement`, `setGlobalProperties`, and `child` for request-scoped instances. `AnalyticsEvents` is the extension point — an app declares its own tracking plan as a type extending it, and `track` narrows `event` to that plan's keys and its properties to that event's shape, so an unknown event name fails at compile time rather than silently reaching a vendor. Every optional input reads `undefined` as absent, so a consumer compiled with `exactOptionalPropertyTypes` — every `@jterrazz/typescript` preset sets it — passes `process.env.X` or `session?.userId` as it comes.
 
 Deliberately absent from the port: sessions, bounce rate, page duration, geolocation, device/browser/OS detection and UTM attribution. A backend derives all of these server-side from `child`'s request context (`ip`, `userAgent`) and from the full URL a `page()` call carries — the port exposes those inputs and never asks a caller to compute the outputs itself.
 

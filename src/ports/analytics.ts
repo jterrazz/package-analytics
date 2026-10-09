@@ -1,20 +1,20 @@
 /** Request-scoped context: backends derive geolocation from `ip` and device, browser and OS from `userAgent`. */
 export type AnalyticsContext = {
     /** Anonymous device identity shared with the web client */
-    deviceId?: string;
+    deviceId?: string | undefined;
     /** IP address of the end user */
-    ip?: string;
+    ip?: string | undefined;
     /** Locale of the end user, e.g. 'fr-FR' */
-    locale?: string;
+    locale?: string | undefined;
     /** Profile attached to every event of this scope */
-    profileId?: string;
+    profileId?: string | undefined;
     /** User-agent of the end user */
-    userAgent?: string;
+    userAgent?: string | undefined;
 };
 
 export type AnalyticsCounterOptions = {
     profileId: string;
-    value?: number;
+    value?: number | undefined;
 };
 
 /** Event catalogue, event name to typed properties: an app extends it to get a compile-time tracking plan. */
@@ -22,8 +22,8 @@ export type AnalyticsEvents = Record<string, Record<string, unknown>>;
 
 /** A viewed page: backends extract path, origin, query and UTM attribution from the full `url`. */
 export type AnalyticsPage = {
-    referrer?: string;
-    title?: string;
+    referrer?: string | undefined;
+    title?: string | undefined;
     /** Full URL, including query string */
     url: string;
 };
@@ -59,38 +59,38 @@ export type AnalyticsPort<TEvents extends AnalyticsEvents = AnalyticsEvents> = {
 };
 
 export type AnalyticsPageOptions = {
-    profileId?: string;
+    profileId?: string | undefined;
 };
 
 /** User profile: the codified traits follow the Segment identify spec, anything else goes into `properties`. */
 export type AnalyticsProfile = {
-    avatar?: string;
+    avatar?: string | undefined;
     /** Account creation date — enables cohort analysis */
-    createdAt?: Date;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
+    createdAt?: Date | undefined;
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
     /** Full name, when firstName/lastName does not apply */
-    name?: string;
-    phone?: string;
+    name?: string | undefined;
+    phone?: string | undefined;
     /** Subscription plan, e.g. 'free', 'pro' */
-    plan?: string;
+    plan?: string | undefined;
     profileId: string;
-    properties?: Record<string, unknown>;
-    username?: string;
-    website?: string;
+    properties?: Record<string, unknown> | undefined;
+    username?: string | undefined;
+    website?: string | undefined;
 };
 
 export type AnalyticsRevenueOptions = {
     /** ISO 4217 currency code */
-    currency?: string;
-    profileId?: string;
-    properties?: Record<string, unknown>;
+    currency?: string | undefined;
+    profileId?: string | undefined;
+    properties?: Record<string, unknown> | undefined;
 };
 
 export type AnalyticsTrackOptions<
     TProperties extends Record<string, unknown> = Record<string, unknown>,
 > = {
-    profileId?: string;
-    properties?: TProperties;
+    profileId?: string | undefined;
+    properties?: TProperties | undefined;
 };

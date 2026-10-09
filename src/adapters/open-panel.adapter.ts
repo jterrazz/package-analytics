@@ -30,11 +30,11 @@ function isStated(value: string | undefined): value is string {
 
 export type OpenPanelAnalyticsConfig = {
     /** Event ingest endpoint of a self-hosted instance; omit for OpenPanel cloud */
-    apiUrl?: string;
+    apiUrl?: string | undefined;
     clientId: string;
     /** Required for server-side tracking and revenue events */
-    clientSecret?: string;
-    globalProperties?: Record<string, unknown>;
+    clientSecret?: string | undefined;
+    globalProperties?: Record<string, unknown> | undefined;
 };
 
 /** OpenPanel analytics adapter backed by @openpanel/sdk; `child(context)` forwards the end user's IP and user-agent so the backend derives geolocation and device. */
@@ -88,7 +88,9 @@ export class OpenPanelAnalyticsAdapter<
     }
 
     async decrement(property: string, options: AnalyticsCounterOptions): Promise<void> {
-        await this.client.decrement({ ...options, property });
+        const { profileId, ...counter } = options;
+
+        await this.client.decrement({ profileId, ...withoutUndefined(counter), property });
     }
 
     async identify(profile: AnalyticsProfile): Promise<void> {
@@ -106,7 +108,9 @@ export class OpenPanelAnalyticsAdapter<
     }
 
     async increment(property: string, options: AnalyticsCounterOptions): Promise<void> {
-        await this.client.increment({ ...options, property });
+        const { profileId, ...counter } = options;
+
+        await this.client.increment({ profileId, ...withoutUndefined(counter), property });
     }
 
     async page(page: AnalyticsPage, options?: AnalyticsPageOptions): Promise<void> {
@@ -114,7 +118,7 @@ export class OpenPanelAnalyticsAdapter<
             __path: page.url,
             __referrer: page.referrer,
             __title: page.title,
-            ...options,
+            ...withoutUndefined({ ...options }),
         });
     }
 
@@ -124,7 +128,7 @@ export class OpenPanelAnalyticsAdapter<
         await this.client.track('revenue', {
             currency,
             ...properties,
-            ...scope,
+            ...withoutUndefined(scope),
             __revenue: amount,
         });
     }
@@ -139,6 +143,6 @@ export class OpenPanelAnalyticsAdapter<
     ): Promise<void> {
         const { properties, ...scope } = options;
 
-        await this.client.track(event, { ...properties, ...scope });
+        await this.client.track(event, { ...properties, ...withoutUndefined(scope) });
     }
 }

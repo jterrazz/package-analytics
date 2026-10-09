@@ -1,10 +1,17 @@
 {
     "compilerOptions": {
+        "exactOptionalPropertyTypes": true,
         "module": "nodenext",
         "noEmit": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noUncheckedIndexedAccess": true,
+        "noUncheckedSideEffectImports": true,
         "strict": true,
         "target": "es2024",
-        "types": []
+        "types": [],
+        "verbatimModuleSyntax": true
     },
     "files": ["types.ts"]
 }
