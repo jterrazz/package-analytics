@@ -1,4 +1,4 @@
-# @jterrazz/analytics — the manual
+# The @jterrazz/analytics manual
 
 Vendor-neutral product analytics for Node.js apps: one port, pluggable adapters. What the package is and how an app starts using it is the repository's README; this page lists every page of the manual, by what the reader came to do.
 
