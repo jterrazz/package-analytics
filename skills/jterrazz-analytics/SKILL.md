@@ -9,7 +9,7 @@ Part of the @jterrazz ecosystem. Defines how all projects track product events.
 
 ## Port
 
-`AnalyticsPort<TEvents>` is the one type an application depends on — eight members, every one of them a property signature:
+`AnalyticsPort<TEvents>` is the one type an application depends on. It has eight members, every one of them a property signature:
 
 ```typescript
 import type { AnalyticsPort } from '@jterrazz/analytics';
@@ -47,7 +47,7 @@ Every optional input of the port takes `undefined` as absent, so `process.env.X`
 
 ## Typed event catalogue (tracking plan)
 
-Each app declares its events as a plain object type — an unknown event, or a property its event does not declare, fails at compile time. Never write it `AnalyticsEvents & { … }` or `interface AppEvents extends AnalyticsEvents`: both carry the catalogue's string index, so every name type-checks. A plain `interface` fails the constraint — it must be a `type`:
+Each app declares its events as a plain object type: an unknown event, or a property its event does not declare, fails at compile time. Never write it `AnalyticsEvents & { ... }` or `interface AppEvents extends AnalyticsEvents`: both carry the catalogue's string index, so every name type-checks. A plain `interface` fails the constraint, so it must be a `type`:
 
 ```typescript
 type AppEvents = {
@@ -58,7 +58,7 @@ const analytics: AnalyticsPort<AppEvents> = new OpenPanelAnalyticsAdapter<AppEve
 
 ## Adapters
 
-**OpenPanel** (production — self-hosted instance):
+**OpenPanel** (production, on a self-hosted instance):
 
 ```typescript
 import { OpenPanelAnalyticsAdapter } from '@jterrazz/analytics';
@@ -93,12 +93,12 @@ A child of a child keeps its parent's context and replaces only the fields it st
 
 ## Rules
 
-- Never read `process.env` inside libraries — the app's composition root builds the config and injects the adapter.
+- Never read `process.env` inside libraries: the app's composition root builds the config and injects the adapter.
 - Depend on `AnalyticsPort` in services; inject the concrete adapter at the composition root.
-- Event names: `object_action`, snake_case, past tense (`user_signed_up`, `article_shared`). Static names only — data goes in properties, never in the name.
+- Event names: `object_action`, snake_case, past tense (`user_signed_up`, `article_shared`). Static names only; data goes in properties, never in the name.
 - Do NOT send UTM, geo, device or session data as properties: the backend derives UTM from `page().url`, geo from `ip`, device from `userAgent`, and computes sessions/bounce itself.
 - On a server, call `identify` only on a request scope (`analytics.child(...)`), never on the shared root adapter: identify binds every later event of that adapter to the profile, so every anonymous event from every later request would be attributed to that user.
 - `revenue()` requires the `clientSecret` (server-side only), default currency EUR.
-- `profileId` is your database id — never the email (email is a trait on `identify`).
+- `profileId` is your database id, never the email (email is a trait on `identify`).
 - Browser-side tracking on the jterrazz stack uses `@openpanel/nextjs` (`OpenPanelComponent`) with the same `apiUrl`/`clientId`; it powers sessions and bounce rate. Server events join those sessions via a shared `profileId`.
-- The self-hosted ingest endpoint only exposes `/track` publicly — dashboards live on the private network.
+- The self-hosted ingest endpoint only exposes `/track` publicly; dashboards live on the private network.
