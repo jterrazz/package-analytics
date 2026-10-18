@@ -73,7 +73,7 @@ export type AnalyticsPageOptions = {
 export type AnalyticsProfile = {
     /** URL of the profile picture */
     avatar?: string | undefined;
-    /** Account creation date — enables cohort analysis */
+    /** Account creation date, which enables cohort analysis */
     createdAt?: Date | undefined;
     email?: string | undefined;
     firstName?: string | undefined;
