@@ -1,6 +1,6 @@
 # @jterrazz/analytics
 
-Vendor-neutral product analytics for Node.js apps, with pluggable adapters.
+Vendor-neutral product analytics for Node.js apps, with pluggable adapters, and the browser bootstrap of a site (`@jterrazz/analytics/browser`).
 
 ## Installation
 
@@ -26,6 +26,24 @@ await analytics.track('article_shared', {
 ```
 
 Declare your tracking plan as a plain object type to get compile-time safety on event names; see [Adapters § The tracking plan](docs/reference/adapters.md#the-tracking-plan).
+
+## Browser
+
+```typescript
+import { installBrowserAnalytics } from '@jterrazz/analytics/browser';
+
+const analytics = installBrowserAnalytics({
+    apiUrl: 'https://analytics.jterrazz.com/api',
+    app: 'my-site',
+    clientId: 'public-client-id',
+    development: import.meta.env.DEV,
+    siteUrl: 'https://my-site.example',
+});
+
+analytics?.track('install_command_copied');
+```
+
+It reports only from a production build on the site's own host, and `track` never throws.
 
 ## Documentation
 

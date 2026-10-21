@@ -19,7 +19,9 @@ An adapter imports the port; the port never imports an adapter. Adding a third v
 
 ## The public surface
 
-`src/index.ts` is the package's one entry, re-exporting the port's types and both adapter classes. `package.json`'s `exports` publishes it as `.`, an ESM and a CommonJS build under `dist/`, built by `typescript build`. There is no subpath: a consumer imports everything from `@jterrazz/analytics`.
+`src/index.ts` is the Node entry, re-exporting the port's types and both adapter classes. `package.json`'s `exports` publishes it as `.`, an ESM and a CommonJS build under `dist/`, built by `typescript build`.
+
+`src/index.browser.ts` is the browser entry, published as `./browser` (ESM only, backed by `@openpanel/web`). It is not an adapter of the port: a document has no request scope, no profile and no revenue, so it exports `installBrowserAnalytics` alone, which owns the bootstrap every site of the estate repeated. It reports only from a production build served on the site's own host, sends the page view with the URL minus its hash, sets the `app` and `environment` global properties, owns the document once, and returns a `track` that never throws, or `undefined` when it refused to install.
 
 ## Related
 

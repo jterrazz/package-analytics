@@ -8,7 +8,7 @@ How a change to this package is made: the declaration every config follows, the 
 
 - `oxlint.config.ts`, `oxfmt.config.ts`, `tsconfig.json` and `vitest.config.ts` are the one-line derivations `typescript fix` writes and `typescript check` refuses to see edited;
 - knip, the build and Stryker are configured by the commands that run them, from the declaration and the manifest;
-- the published entry is read off `package.json#exports`: `.` from `src/index.ts`.
+- the published entry is read off `package.json#exports`: `.` from `src/index.ts`, `./browser` from `src/index.browser.ts`.
 
 The declaration holds no override: `NoopAnalyticsAdapter` lives in `noop.adapter.ts`, the name under which the standard's rulebook lets a null object answer its port by doing nothing.
 
@@ -31,7 +31,8 @@ Build, test and lint output lands under `.artifacts/`, which `.gitignore` ignore
 | Adding                           | Goes in                                                                                                  |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | a new adapter                    | `src/adapters/<vendor>.adapter.ts`, a class implementing `AnalyticsPort`                                 |
-| a public re-export               | `src/index.ts`, the package's one entry                                                                  |
+| a public re-export               | `src/index.ts`, the Node entry                                                                           |
+| a browser-only export            | `src/index.browser.ts`                                                                                   |
 | a behaviour a consumer relies on | a spec under `specs/cli/node/`, driving the packed package from a consumer's project ([Test](test.md))   |
 | a module test                    | `<folder>/__tests__/<module>.test.ts`, kept only on the criteria [Test](test.md#what-earns-a-test) names |
 
