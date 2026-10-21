@@ -1,6 +1,7 @@
 {
     "name": "@jterrazz/analytics",
     "version": "1.0.2",
+    "license": "MIT",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
     "repository": {
         "type": "git",
