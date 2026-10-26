@@ -53,7 +53,7 @@ The manual lives in [`docs/`](docs/README.md):
 - [Adapters](docs/reference/adapters.md): `OpenPanelAnalyticsAdapter` and `NoopAnalyticsAdapter` in depth: config, what each call sends, request scopes.
 - [Develop](docs/guides/develop.md), [Test](docs/guides/test.md) and [Release](docs/guides/release.md): changing, proving and shipping the package.
 
-For agents: read the pages straight from the repo, plus [`skills/jterrazz-analytics`](skills/jterrazz-analytics/SKILL.md).
+For agents: read the pages straight from the repo, plus [`skills/studio-analytics`](skills/studio-analytics/SKILL.md).
 
 ## License
 

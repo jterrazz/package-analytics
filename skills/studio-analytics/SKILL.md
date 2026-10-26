@@ -1,5 +1,5 @@
 ---
-name: jterrazz-analytics
+name: studio-analytics
 description: Use when adding or configuring product analytics (event tracking, page views, revenue, user identification, profile counters) via @jterrazz/analytics. Covers the AnalyticsPort, typed event catalogues, request scopes (child), the OpenPanel adapter (self-hosted) and the noop adapter.
 ---
 

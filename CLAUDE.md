@@ -28,6 +28,6 @@ The gestures (`make install` (`npm ci`, never a plain `npm install`, which can r
 
 ## Standing rule
 
-A new or changed export reaches `README.md`, the relevant `docs/` page and the `skills/jterrazz-analytics/` skill in the same change. None of the three is generated, so nothing else catches a stale one ([Develop § What a change owes](docs/guides/develop.md#what-a-change-owes)).
+A new or changed export reaches `README.md`, the relevant `docs/` page and the `skills/studio-analytics/` skill in the same change. None of the three is generated, so nothing else catches a stale one ([Develop § What a change owes](docs/guides/develop.md#what-a-change-owes)).
 
 `CLAUDE.md` at the root is a symlink to this file: one brief, two names, no second copy.
