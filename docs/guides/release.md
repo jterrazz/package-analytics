@@ -4,11 +4,11 @@ This repository ships one thing: the npm package `@jterrazz/analytics`, publishe
 
 ## What a merge to `main` does
 
-Nothing that reaches a consumer. `.github/workflows/validate.yaml` runs on every push and pull request to `main` and calls the shared `studio-actions` validation workflow: build, lint, test, mutation. A green `main` is a publishable tree, not a published one.
+Nothing that reaches a consumer. `.github/workflows/check.yaml` runs on every push and pull request to `main` and calls the shared `studio-actions` check workflow: build, lint, test, mutation. A green `main` is a publishable tree, not a published one.
 
 ## What publishes
 
-`.github/workflows/release.yaml` fires on `release: created` and calls the shared `release-npm.yaml` workflow with npm provenance (`id-token: write`). Exactly one gesture publishes, and a human makes it: cutting a GitHub Release.
+`.github/workflows/release.yaml` fires on `release: created` and calls the shared `publish-npm.yaml` workflow with npm provenance (`id-token: write`). Exactly one gesture publishes, and a human makes it: cutting a GitHub Release.
 
 The sequence, in order:
 
@@ -22,5 +22,5 @@ Steps 2 to 5 are the owner's. A contributor never bumps the version inside a fea
 
 ## Related
 
-- [Test](test.md): what `validate.yaml` runs.
+- [Test](test.md): what `check.yaml` runs.
 - [Develop](develop.md): the gates a merge must pass.
