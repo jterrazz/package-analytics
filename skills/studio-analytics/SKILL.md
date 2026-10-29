@@ -100,5 +100,5 @@ A child of a child keeps its parent's context and replaces only the fields it st
 - On a server, call `identify` only on a request scope (`analytics.child(...)`), never on the shared root adapter: identify binds every later event of that adapter to the profile, so every anonymous event from every later request would be attributed to that user.
 - `revenue()` requires the `clientSecret` (server-side only), default currency EUR.
 - `profileId` is your database id, never the email (email is a trait on `identify`).
-- Browser-side tracking on the jterrazz stack uses `@openpanel/nextjs` (`OpenPanelComponent`) with the same `apiUrl`/`clientId`; it powers sessions and bounce rate. Server events join those sessions via a shared `profileId`.
+- Browser-side tracking on the studio stack uses `@openpanel/nextjs` (`OpenPanelComponent`) with the same `apiUrl`/`clientId`; it powers sessions and bounce rate. Server events join those sessions via a shared `profileId`.
 - The self-hosted ingest endpoint only exposes `/track` publicly; dashboards live on the private network.
